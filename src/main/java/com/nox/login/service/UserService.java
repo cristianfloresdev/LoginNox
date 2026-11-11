@@ -12,9 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.List;
-
-import static org.apache.logging.log4j.util.Strings.isBlank;
 
 /**
  * Aquí vamos a desarrollar la logic del usuario, el cual le vamos a implementar validaciones y ver que mas
@@ -32,79 +29,32 @@ public class UserService implements IUserService, UserDetailsService
     @Autowired
     private PasswordService passwordService;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    /**
-     * Recupera todos los user almacenados en la base de datos
-     * @return Lista de todos los user
-     */
-    @Override
-    public List<com.nox.login.entity.User> listarUser()
-    {
-        return this.userRepository.findAll();
-    }
-
-    /**
-     * Busca User por su ID
-     * @param idUser ID del user a buscar
-     * @return User si existe, o null si no se encuentra
-     */
-    @Override
-    public com.nox.login.entity.User buscarUserId(Long idUser)
-    {
-        return this.userRepository.findById(idUser).orElse(null);
-    }
-
     /**
      * Guarda un nuevo User o actualiza uno existente si ya tiene ID
      * @param user objeto User a guardar o actualizar
      * @return User guardado o actualizado
      */
     @Override
-    public com.nox.login.entity.User guardarUser(com.nox.login.entity.User user)
+    public User guardarUser(User user)
     {
         if(userRepository.existsByEmail(user.getEmail()))
         {
             throw new IllegalArgumentException("El correo ya esta registrado");
         }
+
+        //Validamos fortaleza y ciframos
+        Password password = passwordService.crearPasswordParaUsuario(
+                user, user.getPassword().getHash()
+        );
+
         //Encriptamos la password antes de guardar
-        user.setPasswordHash(passwordEncoder.encode(user.getPassword().getHash()));
+        user.setPasswordHash(password.getHash());
         return this.userRepository.save(user);
     }
 
-    /**
-     * Elimina Users de la base de datos por su ID
-     * @param idUser ID del user a eliminar
-     */
-    @Override
-    public void eliminarUser(Long idUser)
-    {
-        this.userRepository.deleteById(idUser);
-    }
-
     // =======================================
-    //          Login personalizado
+    //          GESTION DE USUARIOS
     // =======================================
-
-    /**
-     * Creamos la function de validacion de password
-     * @param email
-     * @param passwordIngresado
-     * @return
-     */
-    //!En peligro, este metodo se ira pronto
-    public boolean login(String email, String passwordIngresado)
-    {
-        com.nox.login.entity.User user = userRepository.findByEmail(email).orElse(null);
-
-        if(user == null)
-        {
-            return false;
-        }
-
-        return passwordEncoder.matches(passwordIngresado, user.getPasswordHash());
-    }
-
     /**
      * Actualizar el usuario NUEVO
      */
@@ -172,20 +122,5 @@ public class UserService implements IUserService, UserDetailsService
                 user.getPasswordHash(),
                 Collections.emptyList()
         );
-    }
-
-    /**
-     * Logica del password NUEVO
-     */
-    public User crearUsuario(User user)
-    {
-        if(user.getPassword() != null && user.getPassword().getHash() != null)
-        {
-            Password password = passwordService.crearPasswordParaUsuario(
-                    user, user.getPassword().getHash()
-            );
-            user.setPassword(password);
-        }
-        return userRepository.save(user);
     }
 }

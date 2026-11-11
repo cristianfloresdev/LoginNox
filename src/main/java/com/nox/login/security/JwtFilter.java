@@ -18,7 +18,7 @@ import java.io.IOException;
  * Intercepta peticiones y válido el token
  * Filtro personalizado que intercepta todas las peticiones HTTP
  * para validar el JWT en el encabezado "Authorization".
- *
+ * //*CLASE DE SOPORTE DE INFRAESTRUCTURA DE SEGURIDAD
  * Este filtro se ejecuta una sola vez por request (por eso extiende OncePerRequestFilter)
  * y se encarga de:
  * Extraer el token
@@ -56,8 +56,16 @@ public class JwtFilter extends OncePerRequestFilter
             //Extraemos el token quitando los primeros 7 caracteres(Bearer)
             jwtToken = authHeader.substring(7);
 
+            try
+            {
+                email = jwtUtil.obtenerEmailDelToken(jwtToken);
+            }
+            catch (Exception e)
+            {
+                email = null;
+            }
             //Obtenemos el email (username) con el que se generó el token
-            email = jwtUtil.obtenerEmailDelToken(jwtToken);
+
         }
 
         /**

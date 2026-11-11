@@ -7,7 +7,7 @@ import lombok.ToString;
 
 /**
  * DTO que recibe las credenciales del usuario al momento de hacer login
- * es utilizado por el controlador {@link com.nox.login.controller.AuthController}
+ * es utilizado por el controlador {@link com.nox.login.auth.NoxAuthController}
  * durante la authentication de usuarios
  * @Data: Genera automáticamente getters, setters, equals, hashCode y toString.
  * @NoArgsConstructor: Genera un constructor vacío (sin parámetros).

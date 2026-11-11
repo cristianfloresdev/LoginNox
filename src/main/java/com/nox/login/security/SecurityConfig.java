@@ -10,8 +10,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 /**
+ * Esta clase define las reglas del sistema de seguridad
  * Configuramos Spring Security y el filtro JWT
  * Clase principal de configuration de Spring Security
  *
@@ -28,9 +34,6 @@ public class SecurityConfig
     @Autowired
     private JwtFilter jwtFilter;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
     /**
      * Configura la cadena de seguridad de Spring Security
      * Define como manejara Spring las peticiones HTTP
@@ -38,14 +41,16 @@ public class SecurityConfig
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
     {
-        http.csrf(csrf -> csrf.disable()) //Desactiva CSRF
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable()) //Desactiva CSRF
                 /**
                  * Se desactiva CSRF porque en una API REST con JWT no es necesario
                  * CSRF solo aplica cuando hay sesiones y formularios
                  */
                 .authorizeHttpRequests(auth -> auth
                         //Endpoints que NO requieren authentication
-                                .requestMatchers("/auth/login", "/auth/register").permitAll() //Endpoints publicos
+                                .requestMatchers("/nox-auth/login", "/nox-auth/register").permitAll() //Endpoints publicos
                                 //End//Cualquier otra peticion requiere authentication JWT
                 .anyRequest().authenticated() //Las demás requieren authentication
                 )
@@ -72,5 +77,19 @@ public class SecurityConfig
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception
     {
         return authConfig.getAuthenticationManager();
+    }
+
+    //Para el front
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource()
+    {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://127.0.0.1:5500", "http://localhost:5500"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        return new UrlBasedCorsConfigurationSource(){{
+            registerCorsConfiguration("/**", config);
+        }};
     }
 }

@@ -8,20 +8,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExcepcionHandler
 {
-    @ExceptionHandler(NotaNotFoundExcepcion.class)
-    public ResponseEntity<String> handleNotaNotFound(NotaNotFoundExcepcion ex)
+    @ExceptionHandler(RecursoNoEncontradoExcepcion.class)
+    public ResponseEntity<String> handleNotaNotFound(RecursoNoEncontradoExcepcion ex)
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeException(RuntimeException ex)
+    @ExceptionHandler(PasswordInvalidoException.class)
+    public ResponseEntity<String> handlePasswordInvalido(PasswordInvalidoException ex)
     {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    @ExceptionHandler(PasswordInvalidoException.class)
-    public ResponseEntity<String> handlePasswordInvalido(PasswordInvalidoException ex)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException ex)
     {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }

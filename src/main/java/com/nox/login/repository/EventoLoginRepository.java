@@ -3,7 +3,6 @@ package com.nox.login.repository;
 import com.nox.login.evento.EventoLogin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,5 +23,4 @@ public  interface EventoLoginRepository extends JpaRepository<EventoLogin, Long>
             AND e.timestamp >= :desde
             """)
     long contarFallosRecientesPorIp(String ip, LocalDateTime desde);
-
 }

@@ -1,30 +1,63 @@
 package com.nox.login.service;
 
-import com.nox.login.decision.DecisionLogin;
-import com.nox.login.decision.MotorDecisionCuervo;
-import com.nox.login.evento.EventoLogin;
-import com.nox.login.repository.EventoLoginRepository;
+import com.nox.login.biometria.HuellaDigitalContextual;
+import com.nox.login.biometria.ScoreConfianza;
+import com.nox.login.biometria.NivelConfianza;
+import com.nox.login.biometria.PatronComportamiento;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class NoxLoginService
 {
-    private final EventoLoginRepository eventoRepository;
-    private final MotorDecisionCuervo motorCuervo;
+    /**
+     * Memoria biomimética:
+     * un patrón por usuario (no persistente)
+     */
+    private final Map<String, PatronComportamiento> patronesPorUsuario =
+            new ConcurrentHashMap<>();
 
-    public NoxLoginService(EventoLoginRepository eventoRepository, MotorDecisionCuervo motorCuervo)
+    /**
+     * Analiza y registra el patrón de comportamiento
+     */
+    public PatronComportamiento analizarPatron(
+            String email,
+            HuellaDigitalContextual huella
+    )
     {
-        this.eventoRepository = eventoRepository;
-        this.motorCuervo = motorCuervo;
+        PatronComportamiento patron =
+                patronesPorUsuario.computeIfAbsent(
+                        email,
+                        k -> new PatronComportamiento()
+                );
+
+        patron.registrarIntento(huella);
+        return patron;
     }
 
-    public DecisionLogin procesarIntentoLogin(String email, String ipAddress, boolean exitoso)
+    /**
+     * Calcula el score de confianza
+     */
+    public ResultadoConfianza evaluarConfianza(
+            HuellaDigitalContextual huella,
+            PatronComportamiento patron
+    )
     {
-        //1.- Registrar evento
-        EventoLogin evento = new EventoLogin(email, ipAddress, exitoso);
-        eventoRepository.save(evento);
+        ScoreConfianza calculadora = new ScoreConfianza();
 
-        // 2, Evaluar riesgo
-        return motorCuervo.evaluarRiesgo(ipAddress);
+        int score = calculadora.calcular(huella, patron);
+        NivelConfianza nivel = calculadora.clasificar(score);
+
+        return new ResultadoConfianza(score, nivel);
     }
+
+    /**
+     * Resultado inmutable del análisis
+     */
+    public record ResultadoConfianza(
+            int score,
+            NivelConfianza nivel
+    ) {}
 }

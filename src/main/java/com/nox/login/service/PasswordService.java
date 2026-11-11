@@ -3,76 +3,25 @@ package com.nox.login.service;
 import com.nox.login.entity.Password;
 import com.nox.login.entity.User;
 import com.nox.login.excepciones.PasswordInvalidoException;
-import com.nox.login.repository.PasswordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Aquí vamos a desarrollar la logica del password, el cual le vamos a implementar validaciones de seguridad
  * y logica abstracta pero eficiente
  */
 @Service
-public class PasswordService implements IPasswordService
+public class PasswordService
 {
-     /*
-     Repositorio para acceder a los datos de la entidad Enemigo en la base de datos
-     La inyección de dependencias es automatic gracias a @Autowired
-     */
     @Autowired
-    private PasswordRepository passwordRepository;
-
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    /**
-     * Recupera todos los Passwords almacenados en la base de datos
-     * @return Lista a todos los passwords
-     */
-    @Override
-    public List<Password> listarPassword()
-    {
-        return this.passwordRepository.findAll();
-    }
-
-    /**
-     * Busca Password por su ID
-     * @param idPassword ID del Password a buscar
-     * @return Password si existe, o null si no se encuentra
-     */
-    @Override
-    public Password buscarPasswordId(Long idPassword)
-    {
-        Password password = this.passwordRepository.findById(idPassword).orElse(null);
-        return password;
-    }
-
-    /**
-     * Guarda un nuevo Password o actualiza uno existente si ya tiene ID
-     * @param password objeto Password a guardar o actualizar
-     * @return Password guardado o actualizado
-     */
-    @Override
-    public Password guardarPassword(Password password)
-    {
-        return this.passwordRepository.save(password);
-    }
-
-    /**
-     * Elimina Password de la base de datos por su ID
-     * @param idPassword ID del Password a eliminar
-     */
-    @Override
-    public void eliminarPassword(Long idPassword)
-    {
-        this.passwordRepository.deleteById(idPassword);
-    }
+    private BCryptPasswordEncoder encoder;
 
     // =======================================
     //     Métodos de validaciones Password
     // =======================================
-
     /**
      * Aqui vamos a crear la password cifrada
      * @param user
