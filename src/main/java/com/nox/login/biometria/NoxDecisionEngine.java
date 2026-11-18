@@ -1,18 +1,21 @@
 package com.nox.login.biometria;
 
+import org.springframework.stereotype.Service;
+
 /**
  * NoxDecisionEngine
  * ------------------
  * Motor de decision del cuervo(cerebro)
  *
  * Recibe información procesada si:
- * - Score biomimetico
+ * - Score biomimetic
  * - Nivel de confianza
  * - Número de intentos recientes
  *
  * Devuelve una decision clara y explicita:
  * DecisionAcceso
  */
+@Service
 public class NoxDecisionEngine
 {
     /**

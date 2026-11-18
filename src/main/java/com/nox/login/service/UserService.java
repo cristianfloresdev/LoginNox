@@ -1,9 +1,11 @@
 package com.nox.login.service;
 
+import com.nox.login.dto.RegisterRequestDTO;
 import com.nox.login.entity.Password;
 import com.nox.login.entity.User;
 import com.nox.login.excepciones.RecursoNoEncontradoExcepcion;
 import com.nox.login.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,39 +19,41 @@ import java.util.Collections;
  * Aquí vamos a desarrollar la logic del usuario, el cual le vamos a implementar validaciones y ver que mas
  */
 @Service
+@RequiredArgsConstructor
 public class UserService implements IUserService, UserDetailsService
 {
      /*
      Repositorio para acceder a los datos de la entidad User en la base de datos
      La inyección de dependencias es automatic gracias a @Autowired
      */
-    @Autowired
-    private UserRepository userRepository;
 
-    @Autowired
-    private PasswordService passwordService;
+    private final UserRepository userRepository;
+    private final PasswordService passwordService;
 
     /**
      * Guarda un nuevo User o actualiza uno existente si ya tiene ID
-     * @param user objeto User a guardar o actualizar
+     * @param dto objeto User a guardar o actualizar
      * @return User guardado o actualizado
      */
     @Override
-    public User guardarUser(User user)
+    public User guardarUser(RegisterRequestDTO dto)
     {
-        if(userRepository.existsByEmail(user.getEmail()))
+        if(userRepository.existsByEmail(dto.getEmail()))
         {
             throw new IllegalArgumentException("El correo ya esta registrado");
         }
 
+        User nuevoUsuario = new User();
+        nuevoUsuario.setEmail(dto.getEmail());
+
         //Validamos fortaleza y ciframos
         Password password = passwordService.crearPasswordParaUsuario(
-                user, user.getPassword().getHash()
+                nuevoUsuario, dto.getPassword()
         );
 
         //Encriptamos la password antes de guardar
-        user.setPasswordHash(password.getHash());
-        return this.userRepository.save(user);
+        nuevoUsuario.setPasswordHash(password.getHash());
+        return this.userRepository.save(nuevoUsuario);
     }
 
     // =======================================
