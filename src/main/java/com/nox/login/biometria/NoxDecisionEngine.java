@@ -35,7 +35,7 @@ public class NoxDecisionEngine
         // =========================
         //Si hay muchos intentos y la confianza es baja,
         //se asume ataque activo
-        if (intentosRecientes >= INTENTOS_MAXIMOS && nivel == NivelConfianza.BAJA)
+        if (intentosRecientes >= INTENTOS_MAXIMOS || nivel == NivelConfianza.BAJA)
         {
             return DecisionAcceso.BLOQUEAR;
         }
